@@ -5,6 +5,22 @@ const sql = neon(process.env.DATABASE_URL!);
 
 const ITEMS_PER_PAGE = 5;
 
+// Shared column list — keep this in one place so every query stays in sync
+const MEETING_COLUMNS = `
+  id,
+  to_char(date, 'YYYY-MM-DD') AS "date",
+  meeting_type                AS "meetingType",
+  presiding, conducting, announcements,
+  opening_hymn                AS "openingHymn",
+  opening_prayer              AS "openingPrayer",
+  ward_business               AS "wardBusiness",
+  stake_business              AS "stakeBusiness",
+  sacrament_hymn              AS "sacramentHymn",
+  speakers,
+  closing_hymn                AS "closingHymn",
+  closing_prayer              AS "closingPrayer"
+`;
+
 export async function getMeetings(
   query: string = '',
   currentPage: number = 1
@@ -13,19 +29,7 @@ export async function getMeetings(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const rows = await sql`
-    SELECT
-      id,
-      to_char(date, 'YYYY-MM-DD') AS "date",
-      meeting_type                AS "meetingType",
-      presiding, conducting, announcements,
-      opening_hymn                AS "openingHymn",
-      opening_prayer              AS "openingPrayer",
-      ward_business               AS "wardBusiness",
-      stake_business              AS "stakeBusiness",
-      sacrament_hymn              AS "sacramentHymn",
-      speakers,
-      closing_hymn                AS "closingHymn",
-      closing_prayer              AS "closingPrayer"
+    SELECT ${sql.unsafe(MEETING_COLUMNS)}
     FROM meetings
     WHERE
       presiding     ILIKE ${searchTerm}
@@ -57,20 +61,7 @@ export async function getMeetingById(
   id: number
 ): Promise<SacramentMeeting | null> {
   const rows = await sql`
-    SELECT
-      id,
-      to_char(date, 'YYYY-MM-DD') AS "date",
-      meeting_type                AS "meetingType",
-      presiding, conducting, announcements,
-      opening_hymn                AS "openingHymn",
-      opening_prayer              AS "openingPrayer",
-      ward_business               AS "wardBusiness",
-      stake_business              AS "stakeBusiness",
-      sacrament_hymn              AS "sacramentHymn",
-      speakers,
-      closing_hymn                AS "closingHymn",
-      closing_prayer              AS "closingPrayer"
-    FROM meetings WHERE id = ${id}
+    SELECT ${sql.unsafe(MEETING_COLUMNS)} FROM meetings WHERE id = ${id}
   `;
   return (rows[0] as unknown as SacramentMeeting) ?? null;
 }
@@ -79,20 +70,7 @@ export async function getMeetingByDate(
   date: string
 ): Promise<SacramentMeeting | null> {
   const rows = await sql`
-    SELECT
-      id,
-      to_char(date, 'YYYY-MM-DD') AS "date",
-      meeting_type                AS "meetingType",
-      presiding, conducting, announcements,
-      opening_hymn                AS "openingHymn",
-      opening_prayer              AS "openingPrayer",
-      ward_business               AS "wardBusiness",
-      stake_business              AS "stakeBusiness",
-      sacrament_hymn              AS "sacramentHymn",
-      speakers,
-      closing_hymn                AS "closingHymn",
-      closing_prayer              AS "closingPrayer"
-    FROM meetings WHERE date = ${date}
+    SELECT ${sql.unsafe(MEETING_COLUMNS)} FROM meetings WHERE date = ${date}
   `;
   return (rows[0] as unknown as SacramentMeeting) ?? null;
 }
