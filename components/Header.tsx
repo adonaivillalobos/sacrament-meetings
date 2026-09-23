@@ -1,3 +1,4 @@
+import { Show, SignInButton, UserButton } from '@clerk/nextjs';
 import NavLinks from './NavLinks';
 
 export default function Header() {
@@ -15,7 +16,22 @@ export default function Header() {
           <span className="text-xl font-bold block">Riverside Ward</span>
           <span className="text-sm text-blue-100">{today}</span>
         </div>
-        <NavLinks />
+
+        <div className="flex items-center gap-4">
+          <NavLinks />
+
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-blue-800 hover:bg-blue-50">
+                Sign In
+              </button>
+            </SignInButton>
+          </Show>
+
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
+        </div>
       </div>
     </header>
   );
